@@ -65,7 +65,7 @@ npm install
 1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
 2. Create a new app
 3. Note your Client ID and Client Secret
-4. Add `http://localhost:3000/callback` to Redirect URIs
+4. Add `http://localhost:3555/callback` to Redirect URIs
 
 ### 4. Configure Environment Variables
 ```bash
@@ -76,8 +76,8 @@ Edit `.env` with your Spotify credentials:
 ```env
 SPOTIFY_CLIENT_ID=your_spotify_client_id_here
 SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_here
-REDIRECT_URI=http://localhost:3000/callback
-PORT=3000
+REDIRECT_URI=http://localhost:3555/callback
+PORT=3555
 SESSION_SECRET=your_random_session_secret_here
 NODE_ENV=development
 ```
@@ -92,7 +92,7 @@ npm start
 ```
 
 ### 6. Access the Application
-Open your browser and navigate to: `http://localhost:3000`
+Open your browser and navigate to: `http://localhost:3555`
 
 ## 🔐 Environment Variables
 
@@ -100,8 +100,8 @@ Open your browser and navigate to: `http://localhost:3000`
 |----------|-------------|---------|
 | `SPOTIFY_CLIENT_ID` | Your Spotify app client ID | `abc123def456` |
 | `SPOTIFY_CLIENT_SECRET` | Your Spotify app client secret | `xyz789uvw012` |
-| `REDIRECT_URI` | OAuth callback URL | `http://localhost:3000/callback` |
-| `PORT` | Server port number | `3000` |
+| `REDIRECT_URI` | OAuth callback URL | `http://localhost:3555/callback` |
+| `PORT` | Server port number | `3555` |
 | `SESSION_SECRET` | Secret for session encryption | `your-secret-key-here` |
 | `NODE_ENV` | Environment mode | `development` or `production` |
 

@@ -8,7 +8,7 @@ const authRoutes = require('../routes/auth');
 const musicRoutes = require('../routes/music');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3555;
 
 // Middleware
 app.use(express.json());
