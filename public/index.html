@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moodify - Spotify Mood-Based Music Picker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1db954, #191414);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #1db954, #1ed760);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .auth-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .btn {
+            background: #1db954;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #1ed760;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .mood-section {
+            display: none;
+            margin-bottom: 40px;
+        }
+
+        .mood-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .mood-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mood-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #1db954;
+        }
+
+        .mood-btn.active {
+            background: #1db954;
+            border-color: #1db954;
+        }
+
+        .results {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .track-info h3 {
+            margin-bottom: 5px;
+        }
+
+        .track-info p {
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        .track-link {
+            color: #1db954;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .track-link:hover {
+            color: #1ed760;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .mood-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Moodify</h1>
+            <p>Discover music that matches your mood using Spotify's recommendation engine</p>
+        </div>
+
+        <div class="auth-section" id="authSection">
+            <div id="loginSection">
+                <p>Connect your Spotify account to get personalized mood-based recommendations</p>
+                <br>
+                <a href="/login" class="btn">🎵 Login with Spotify</a>
+            </div>
+            
+            <div id="userSection" style="display: none;">
+                <div class="user-info">
+                    <p>Welcome, <span id="userName"></span>!</p>
+                    <a href="/logout" class="btn">Logout</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="mood-section" id="moodSection">
+            <h2>How are you feeling?</h2>
+            <div class="mood-buttons" id="moodButtons">
+                <!-- Mood buttons will be populated by JavaScript -->
+            </div>
+            
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
