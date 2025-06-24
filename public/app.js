@@ -73,7 +73,7 @@ class MoodifyApp {
         if (!this.isAuthenticated) return;
 
         try {
-            const response = await fetch('/moods');
+            const response = await fetch('/api/music/moods');
             const data = await response.json();
             
             const moodButtons = document.getElementById('moodButtons');
@@ -126,7 +126,7 @@ class MoodifyApp {
 
         try {
             // Call our backend API with the selected mood
-            const response = await fetch(`/recommendations?mood=${mood}&limit=10`);
+            const response = await fetch(`/api/music/recommendations?mood=${mood}&limit=10`);
             const data = await response.json();
 
             // Check if the request was successful

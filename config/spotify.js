@@ -10,7 +10,7 @@
 
 const spotifyConfig = {
   // App credentials from Spotify Developer Dashboard
-  clientId: process.env.SPOTIFY_CLIENT_ID,         // Public identifier for our app
+  clientId: process.env.SPOTIFY_CLIENT_ID,         // Public identifier for my app
   clientSecret: process.env.SPOTIFY_CLIENT_SECRET, // Secret key (never expose this!)
   redirectUri: process.env.REDIRECT_URI,           // Where Spotify sends users after login
 
@@ -22,7 +22,9 @@ const spotifyConfig = {
    */
   scopes: [
     'user-read-private',          // Access to user's profile info
-    'user-read-email'             // Access to user's email address
+    'user-read-email',            // Access to user's email address
+    'user-top-read',              // Access to user's top tracks and artists
+    'user-read-playback-state'    // Access to audio features (required for mood analysis)
   ],
 
   // Spotify OAuth endpoints

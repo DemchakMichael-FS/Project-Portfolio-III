@@ -20,6 +20,69 @@ const { getMoodFeatures, getSupportedMoods } = require('../config/moodMapper'); 
 
 const router = express.Router();
 
+// Simple test route to verify mounting
+router.get('/test', (req, res) => {
+  res.json({ message: 'Music routes are working!', timestamp: new Date().toISOString() });
+});
+
+/**
+ * MOOD SEARCH QUERIES
+ *
+ * Generate search terms to find playlists that match specific moods
+ */
+function getMoodSearchQueries(mood) {
+  const searchQueries = {
+    happy: [
+      'happy music',
+      'feel good songs',
+      'upbeat playlist',
+      'positive vibes',
+      'good mood music'
+    ],
+    sad: [
+      'sad songs',
+      'melancholy music',
+      'heartbreak playlist',
+      'emotional ballads',
+      'crying songs'
+    ],
+    energetic: [
+      'workout music',
+      'high energy songs',
+      'pump up playlist',
+      'gym music',
+      'energetic beats'
+    ],
+    relaxed: [
+      'chill music',
+      'relaxing songs',
+      'calm playlist',
+      'peaceful music',
+      'ambient chill'
+    ],
+    focused: [
+      'study music',
+      'focus playlist',
+      'concentration music',
+      'instrumental focus',
+      'work music'
+    ],
+    romantic: [
+      'love songs',
+      'romantic music',
+      'date night playlist',
+      'romantic ballads',
+      'love playlist'
+    ]
+  };
+
+  return searchQueries[mood.toLowerCase()] || ['music playlist'];
+}
+
+
+
+
+
 /**
  * AUTHENTICATION MIDDLEWARE
  *
@@ -51,30 +114,42 @@ function requireAuth(req, res, next) {
  * 4. Call Spotify's recommendations API
  * 5. Format and return track data
  */
-router.get('/recommendations', requireAuth, async (req, res) => {
+router.get('/recommendations', async (req, res) => {
+  console.log('🎯 Recommendations route hit!');
+
+  // Check if user is authenticated
+  if (!req.session.access_token) {
+    console.log('❌ No access token found');
+    return res.status(401).json({
+      error: 'Not authenticated',
+      message: 'Please login first',
+      loginUrl: '/login'
+    });
+  }
+  // Extract parameters from the URL query string (outside try block so accessible in catch)
+  const { mood, limit = 20 } = req.query;
+
+  // Validate that mood parameter was provided
+  if (!mood) {
+    return res.status(400).json({
+      error: 'Mood parameter is required',
+      supportedMoods: getSupportedMoods()
+    });
+  }
+
+  // Convert the mood to Spotify audio features (outside try block so accessible in catch)
+  let moodFeatures;
   try {
-    // Extract parameters from the URL query string
-    const { mood, limit = 20 } = req.query;
+    moodFeatures = getMoodFeatures(mood);  // This is where the magic happens!
+  } catch (error) {
+    // Handle invalid mood (not in our supported list)
+    return res.status(400).json({
+      error: error.message,
+      supportedMoods: getSupportedMoods()
+    });
+  }
 
-    // Validate that mood parameter was provided
-    if (!mood) {
-      return res.status(400).json({
-        error: 'Mood parameter is required',
-        supportedMoods: getSupportedMoods()
-      });
-    }
-
-    // Convert the mood to Spotify audio features
-    let moodFeatures;
-    try {
-      moodFeatures = getMoodFeatures(mood);  // This is where the magic happens!
-    } catch (error) {
-      // Handle invalid mood (not in our supported list)
-      return res.status(400).json({
-        error: error.message,
-        supportedMoods: getSupportedMoods()
-      });
-    }
+  try {
 
     // Use absolute minimal parameters - just what Spotify requires
     // Spotify requires at least one seed parameter (genres, artists, or tracks)
@@ -83,13 +158,14 @@ router.get('/recommendations', requireAuth, async (req, res) => {
       seed_genres: 'pop'  // Use single reliable genre first
     };
 
-    // Add mood features to the parameters
-    Object.assign(params, moodFeatures);
+    // For now, let's try without any audio features to see if basic API works
+    // We'll add mood features back once we confirm the endpoint works
+    console.log('🧪 Testing basic recommendations without mood features first...');
 
     const recommendationsUrl = `${spotifyConfig.apiBaseUrl}/recommendations?${querystring.stringify(params)}`;
 
     console.log('🎵 Requesting recommendations:', recommendationsUrl);
-    console.log('🎭 Params used:', params);
+    console.log('🎭 Params used:', JSON.stringify(params, null, 2));
     console.log('🔑 Token length:', req.session.access_token ? req.session.access_token.length : 'NO TOKEN');
     console.log('🔑 Token starts with:', req.session.access_token ? req.session.access_token.substring(0, 20) + '...' : 'NO TOKEN');
 
@@ -106,17 +182,117 @@ router.get('/recommendations', requireAuth, async (req, res) => {
       throw new Error('Token validation failed');
     }
 
-    const response = await axios.get(recommendationsUrl, {
+    // Test if we can get available genres (this should work if recommendations API is available)
+    try {
+      const genresTest = await axios.get(`${spotifyConfig.apiBaseUrl}/recommendations/available-genre-seeds`, {
+        headers: {
+          'Authorization': `Bearer ${req.session.access_token}`
+        }
+      });
+      console.log('✅ Genres API test passed, available genres:', genresTest.data.genres.length);
+    } catch (genresError) {
+      console.log('❌ Genres API test failed:', genresError.response?.status, genresError.response?.data);
+      console.log('🔍 This suggests the recommendations API might not be available');
+    }
+
+    // Search for public playlists that match the mood
+    console.log(`🔍 Searching for ${mood} playlists on Spotify...`);
+
+    // Create search queries for the mood
+    const moodSearchQueries = getMoodSearchQueries(mood);
+    console.log(`🎭 Search queries for ${mood}:`, moodSearchQueries);
+
+    // Search for playlists matching the mood
+    const playlistSearchResponse = await axios.get(`${spotifyConfig.apiBaseUrl}/search`, {
       headers: {
         'Authorization': `Bearer ${req.session.access_token}`
+      },
+      params: {
+        q: moodSearchQueries[0], // Use the first search query
+        type: 'playlist',
+        limit: 10,
+        market: 'US'
       }
     });
 
-    const tracks = response.data.tracks.map(track => ({
+    console.log(`✅ Found ${playlistSearchResponse.data.playlists.items.length} playlists for mood: ${mood}`);
+
+    // Get tracks from the first few playlists
+    let allPlaylistTracks = [];
+    const validPlaylists = playlistSearchResponse.data.playlists.items.filter(playlist =>
+      playlist && playlist.id && playlist.name && playlist.owner
+    );
+    const playlistsToCheck = validPlaylists.slice(0, 3); // Check first 3 valid playlists
+
+    console.log(`🎵 Found ${validPlaylists.length} valid playlists, checking first ${playlistsToCheck.length}`);
+
+    if (playlistsToCheck.length === 0) {
+      return res.status(404).json({
+        error: 'No playlists found',
+        message: `Could not find any playlists for mood: ${mood}`,
+        mood
+      });
+    }
+
+    for (const playlist of playlistsToCheck) {
+      try {
+        console.log(`🎵 Getting tracks from playlist: "${playlist.name}" by ${playlist.owner.display_name}`);
+
+        const playlistTracksResponse = await axios.get(`${spotifyConfig.apiBaseUrl}/playlists/${playlist.id}/tracks`, {
+          headers: {
+            'Authorization': `Bearer ${req.session.access_token}`
+          },
+          params: {
+            limit: 20, // Get 20 tracks from each playlist
+            fields: 'items(track(id,name,artists,album,preview_url,external_urls,duration_ms,popularity))'
+          }
+        });
+
+        // Extract and format tracks
+        const playlistTracks = playlistTracksResponse.data.items
+          .filter(item => item.track && item.track.id) // Filter out null tracks
+          .map(item => ({
+            id: item.track.id,
+            name: item.track.name,
+            artists: item.track.artists.map(artist => artist.name),
+            album: item.track.album.name,
+            preview_url: item.track.preview_url,
+            external_urls: item.track.external_urls,
+            duration_ms: item.track.duration_ms,
+            popularity: item.track.popularity,
+            source_playlist: playlist.name
+          }));
+
+        allPlaylistTracks = [...allPlaylistTracks, ...playlistTracks];
+        console.log(`✅ Added ${playlistTracks.length} tracks from "${playlist.name}"`);
+
+      } catch (playlistError) {
+        console.log(`⚠️ Could not get tracks from playlist "${playlist.name}":`, playlistError.response?.status);
+      }
+    }
+
+    // Remove duplicates based on track ID
+    const uniqueTracks = allPlaylistTracks.filter((track, index, self) =>
+      index === self.findIndex(t => t.id === track.id)
+    );
+
+    console.log(`🎭 Total unique tracks found: ${uniqueTracks.length} for mood: ${mood}`);
+
+    if (uniqueTracks.length === 0) {
+      return res.status(404).json({
+        error: 'No tracks found',
+        message: `Could not find any tracks in playlists for mood: ${mood}`,
+        mood
+      });
+    }
+
+    // Shuffle and limit the results
+    const shuffledTracks = uniqueTracks.sort(() => Math.random() - 0.5);
+    const tracks = shuffledTracks.slice(0, params.limit).map(track => ({
       id: track.id,
       name: track.name,
-      artists: track.artists.map(artist => artist.name),
-      album: track.album.name,
+      artists: track.artists,
+      album: track.album,
       preview_url: track.preview_url,
       external_urls: track.external_urls,
       duration_ms: track.duration_ms,
@@ -144,50 +320,13 @@ router.get('/recommendations', requireAuth, async (req, res) => {
       });
     }
 
-    // For now, fall back to mock data when Spotify API fails
-    console.log('🎭 Falling back to mock recommendations for mood:', mood);
-
-    const mockTracks = {
-      happy: [
-        { id: '1', name: 'Happy Song', artists: ['Happy Artist'], album: 'Joy Album', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 180000, popularity: 85 },
-        { id: '2', name: 'Sunshine Day', artists: ['Bright Band'], album: 'Sunny Times', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 200000, popularity: 78 },
-        { id: '3', name: 'Good Vibes', artists: ['Positive People'], album: 'Feel Good', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 195000, popularity: 82 }
-      ],
-      sad: [
-        { id: '4', name: 'Melancholy Blues', artists: ['Sad Singer'], album: 'Tears', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 240000, popularity: 70 },
-        { id: '5', name: 'Rainy Day', artists: ['Moody Musicians'], album: 'Gray Skies', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 220000, popularity: 65 },
-        { id: '6', name: 'Empty Heart', artists: ['Lonely Lyrics'], album: 'Solitude', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 210000, popularity: 68 }
-      ],
-      energetic: [
-        { id: '7', name: 'Power Workout', artists: ['Energy Band'], album: 'Pump It Up', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 180000, popularity: 90 },
-        { id: '8', name: 'High Intensity', artists: ['Adrenaline Rush'], album: 'Maximum Energy', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 175000, popularity: 88 },
-        { id: '9', name: 'Beast Mode', artists: ['Workout Warriors'], album: 'Gym Hits', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 190000, popularity: 85 }
-      ],
-      relaxed: [
-        { id: '10', name: 'Peaceful Mind', artists: ['Calm Collective'], album: 'Serenity', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 300000, popularity: 75 },
-        { id: '11', name: 'Gentle Breeze', artists: ['Tranquil Tunes'], album: 'Meditation', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 280000, popularity: 72 },
-        { id: '12', name: 'Soft Whispers', artists: ['Quiet Quartet'], album: 'Stillness', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 320000, popularity: 70 }
-      ],
-      focused: [
-        { id: '13', name: 'Deep Concentration', artists: ['Focus Flow'], album: 'Productivity', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 360000, popularity: 68 },
-        { id: '14', name: 'Study Session', artists: ['Brain Beats'], album: 'Mental Clarity', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 400000, popularity: 65 },
-        { id: '15', name: 'Work Zone', artists: ['Concentration Crew'], album: 'Flow State', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 380000, popularity: 70 }
-      ],
-      romantic: [
-        { id: '16', name: 'Love Ballad', artists: ['Romance Records'], album: 'Heart Songs', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 250000, popularity: 80 },
-        { id: '17', name: 'Sweet Serenade', artists: ['Cupid\'s Choir'], album: 'Valentine Vibes', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 230000, popularity: 77 },
-        { id: '18', name: 'Tender Moments', artists: ['Loving Lyrics'], album: 'Intimate', external_urls: { spotify: '#' }, preview_url: null, duration_ms: 270000, popularity: 75 }
-      ]
-    };
-
-    const tracks = mockTracks[mood.toLowerCase()] || mockTracks.happy;
-
-    res.json({
+    // Return the actual error instead of mock data
+    res.status(error.response?.status || 500).json({
+      error: 'Failed to fetch recommendations from Spotify',
+      message: error.message,
+      details: error.response?.data,
       mood,
-      moodFeatures,
-      tracks,
-      total: tracks.length,
-      message: 'Using demo data - Spotify API temporarily unavailable'
+      moodFeatures
     });
   }
 });

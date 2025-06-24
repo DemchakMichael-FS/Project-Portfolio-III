@@ -76,8 +76,8 @@ app.use(session({
 // Authentication routes: /login, /callback, /logout, /auth/status
 app.use('/', authRoutes);
 
-// Music routes: /recommendations, /moods
-app.use('/', musicRoutes);
+// Music routes: /api/music/recommendations, /api/music/moods
+app.use('/api/music', musicRoutes);
 
 /**
  * HOME PAGE ROUTE
