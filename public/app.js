@@ -122,7 +122,7 @@ class MoodifyApp {
         const resultsDiv = document.getElementById('results');
 
         // Show loading state while we fetch recommendations
-        resultsDiv.innerHTML = '<div class="loading">🎵 Finding perfect tracks for your mood...</div>';
+        resultsDiv.innerHTML = '<div class="loading">♪ Finding perfect tracks for your mood...</div>';
 
         try {
             // Call our backend API with the selected mood
@@ -164,7 +164,7 @@ class MoodifyApp {
         }
 
         let html = `
-            <h3>🎵 ${this.capitalizeMood(data.mood)} vibes (${data.tracks.length} tracks)</h3>
+            <h3>♪ ${this.capitalizeMood(data.mood)} vibes (${data.tracks.length} tracks)</h3>
             <div class="tracks">
         `;
 

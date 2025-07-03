@@ -23,14 +23,18 @@
 
     <style>
         /*
-        CSS STYLING
+        ENHANCED MOODIFY STYLING
 
-        The styles create a modern, Spotify-inspired interface with:
-        - Dark theme with green accents
-        - Responsive grid layout for mood buttons
-        - Smooth animations and hover effects
-        - Mobile-friendly responsive design
+        Modern, visually appealing design with:
+        - Animated gradient backgrounds
+        - Glassmorphism effects
+        - Floating elements and shadows
+        - Smooth animations and micro-interactions
+        - Professional typography and spacing
         */
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
         * {
             margin: 0;
             padding: 0;
@@ -38,164 +42,395 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1db954, #191414);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f7a3a 0%, #12a04a 25%, #191414 75%, #000000 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
             color: white;
             min-height: 100vh;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating background elements */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(29, 185, 84, 0.1) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 60px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .header h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #000000;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
+                         0 0 40px rgba(255, 255, 255, 0.6),
+                         0 0 60px rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header-music-note {
+            color: #000000;
+            font-size: 4rem;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            font-weight: 300;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .auth-section {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .login-card p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .btn {
             background: linear-gradient(45deg, #1db954, #1ed760);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin: 5px;
+            box-shadow: 0 10px 25px rgba(29, 185, 84, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            background: linear-gradient(45deg, #1ed760, #22e55f);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(29, 185, 84, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: linear-gradient(45deg, #666, #777);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .mood-section {
+            display: none;
+            margin-bottom: 60px;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .mood-section h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 40px;
+            background: linear-gradient(45deg, #ffffff, #1ed760);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.8;
-        }
-
-        .auth-section {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .btn {
-            background: #1db954;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-size: 1rem;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s ease;
-            margin: 5px;
-        }
-
-        .btn:hover {
-            background: #1ed760;
-            transform: translateY(-2px);
-        }
-
-        .btn:disabled {
-            background: #666;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .mood-section {
-            display: none;
-            margin-bottom: 40px;
-        }
-
         .mood-buttons {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
         }
 
         .mood-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             color: white;
-            padding: 15px;
-            border-radius: 15px;
-            font-size: 1rem;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .mood-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .mood-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: #1db954;
+            background: linear-gradient(135deg, #7c8ff0 0%, #8a5cb8 100%);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4), 0 0 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .mood-btn:hover::before {
+            opacity: 1;
         }
 
         .mood-btn.active {
-            background: #1db954;
-            border-color: #1db954;
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            border-color: rgba(255, 255, 255, 0.6);
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5), 0 0 40px rgba(102, 126, 234, 0.3);
         }
 
         .results {
             background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 20px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
 
         .track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
+            background: linear-gradient(135deg, rgba(0, 191, 255, 0.15) 0%, rgba(138, 43, 226, 0.15) 100%);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 191, 255, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 191, 255, 0.2);
+        }
+
+        .track:hover {
+            background: linear-gradient(135deg, rgba(0, 191, 255, 0.25) 0%, rgba(138, 43, 226, 0.25) 100%);
+            transform: translateX(5px);
+            box-shadow: 0 10px 30px rgba(0, 191, 255, 0.3), 0 0 20px rgba(0, 191, 255, 0.2);
+            border-color: rgba(0, 191, 255, 0.5);
         }
 
         .track-info h3 {
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
         }
 
         .track-info p {
-            opacity: 0.7;
-            font-size: 0.9rem;
+            opacity: 0.8;
+            font-size: 0.95rem;
+            font-weight: 400;
         }
 
         .track-link {
-            color: #1db954;
+            color: #00bfff;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(0, 191, 255, 0.1);
+            border: 1px solid rgba(0, 191, 255, 0.3);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 191, 255, 0.2);
         }
 
         .track-link:hover {
-            color: #1ed760;
+            color: white;
+            background: linear-gradient(135deg, #00bfff 0%, #8a2be2 100%);
+            border-color: #00bfff;
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 191, 255, 0.4), 0 0 10px rgba(0, 191, 255, 0.3);
         }
 
         .loading {
             text-align: center;
-            padding: 20px;
+            padding: 40px;
+            font-size: 1.1rem;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #1db954;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .error {
-            background: rgba(255, 0, 0, 0.2);
-            border: 1px solid rgba(255, 0, 0, 0.5);
-            border-radius: 10px;
-            padding: 15px;
+            background: rgba(255, 82, 82, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 82, 82, 0.5);
+            border-radius: 16px;
+            padding: 20px;
             margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(255, 82, 82, 0.1);
         }
 
         .user-info {
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
             text-align: center;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
         }
 
+        .user-info p {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .header p {
+                font-size: 1.1rem;
+            }
+
+            .mood-buttons {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .login-card {
+                padding: 30px 20px;
+                margin: 0 10px;
+            }
+
+            .track {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
             .header h1 {
                 font-size: 2rem;
             }
-            
+
             .mood-buttons {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: 1fr;
+            }
+
+            body {
+                padding: 15px;
             }
         }
     </style>
@@ -203,31 +438,41 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎵 Moodify</h1>
-            <p>Discover music that matches your mood using Spotify's recommendation engine</p>
+            <h1>
+                <span class="header-music-note">♪</span>
+                Moodify
+            </h1>
+            <p>Discover music that matches your mood using Spotify's powerful recommendation engine</p>
         </div>
 
         <div class="auth-section" id="authSection">
             <div id="loginSection">
-                <p>Connect your Spotify account to get personalized mood-based recommendations</p>
-                <br>
-                <a href="/login" class="btn">🎵 Login with Spotify</a>
+                <div class="login-card">
+                    <p>Connect your Spotify account to unlock personalized mood-based music recommendations tailored just for you</p>
+                    <a href="/login" class="btn">
+                        <span style="color: #000000;">♪</span>
+                        Login with Spotify
+                    </a>
+                </div>
             </div>
-            
+
             <div id="userSection" style="display: none;">
                 <div class="user-info">
-                    <p>Welcome, <span id="userName"></span>!</p>
-                    <a href="/logout" class="btn">Logout</a>
+                    <p>Welcome back, <span id="userName"></span>! 🎉</p>
+                    <a href="/logout" class="btn">
+                        <span>👋</span>
+                        Logout
+                    </a>
                 </div>
             </div>
         </div>
 
         <div class="mood-section" id="moodSection">
-            <h2>How are you feeling?</h2>
+            <h2>How are you feeling today?</h2>
             <div class="mood-buttons" id="moodButtons">
                 <!-- Mood buttons will be populated by JavaScript -->
             </div>
-            
+
             <div id="results"></div>
         </div>
     </div>
