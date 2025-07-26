@@ -393,6 +393,209 @@
             margin-bottom: 15px;
         }
 
+        /* Mood History Section */
+        .mood-history-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 40px;
+            animation: fadeInUp 1s ease-out 0.8s both;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .history-header h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(45deg, #ffffff, #00bfff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .history-icon {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        .history-controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        .history-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-btn:hover {
+            background: linear-gradient(135deg, #7c8ff0 0%, #8a5cb8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .history-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            background: rgba(0, 191, 255, 0.1);
+            border: 1px solid rgba(0, 191, 255, 0.3);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:hover {
+            background: rgba(0, 191, 255, 0.2);
+            border-color: rgba(0, 191, 255, 0.5);
+        }
+
+        .filter-select option {
+            background: #191414;
+            color: white;
+        }
+
+        .history-timeline {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .history-item {
+            background: linear-gradient(135deg, rgba(0, 191, 255, 0.1) 0%, rgba(138, 43, 226, 0.1) 100%);
+            border: 1px solid rgba(0, 191, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: linear-gradient(135deg, rgba(0, 191, 255, 0.2) 0%, rgba(138, 43, 226, 0.2) 100%);
+            border-color: rgba(0, 191, 255, 0.4);
+            transform: translateX(5px);
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .mood-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .history-timestamp {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+        }
+
+        .history-tracks {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(0, 191, 255, 0.15) 0%, rgba(138, 43, 226, 0.15) 100%);
+            border: 1px solid rgba(0, 191, 255, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 191, 255, 0.2);
+        }
+
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00bfff;
+            margin: 0;
+        }
+
+        .insights-section h3 {
+            margin-bottom: 20px;
+            color: white;
+            font-size: 1.3rem;
+        }
+
+        .insight-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #00bfff;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .insight-icon {
+            font-size: 1.2rem;
+            margin-right: 10px;
+        }
+
+        .insight-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #00bfff;
+        }
+
+        .insight-message {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .header h1 {
@@ -417,6 +620,24 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 15px;
+            }
+
+            .history-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .history-filters {
+                flex-direction: column;
+            }
+
+            .filter-select {
+                width: 100%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -474,6 +695,75 @@
             </div>
 
             <div id="results"></div>
+        </div>
+
+        <!-- Mood History Section -->
+        <div class="mood-history-section" id="moodHistorySection" style="display: none;">
+            <div class="history-header">
+                <h2>
+                    <span class="history-icon">📊</span>
+                    Your Mood Journey
+                </h2>
+                <div class="history-controls">
+                    <button class="history-btn" id="toggleHistoryBtn">
+                        <span>📈</span>
+                        View History
+                    </button>
+                    <button class="history-btn" id="toggleStatsBtn" style="display: none;">
+                        <span>📊</span>
+                        View Stats
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mood History Timeline -->
+            <div class="history-content" id="historyContent" style="display: none;">
+                <div class="history-filters">
+                    <select id="moodFilter" class="filter-select">
+                        <option value="">All Moods</option>
+                        <option value="happy">Happy</option>
+                        <option value="sad">Sad</option>
+                        <option value="energetic">Energetic</option>
+                        <option value="relaxed">Relaxed</option>
+                        <option value="focused">Focused</option>
+                        <option value="romantic">Romantic</option>
+                    </select>
+                    <select id="daysFilter" class="filter-select">
+                        <option value="7">Last 7 days</option>
+                        <option value="30" selected>Last 30 days</option>
+                        <option value="90">Last 90 days</option>
+                    </select>
+                </div>
+
+                <div class="history-timeline" id="historyTimeline">
+                    <div class="loading">📊 Loading your mood history...</div>
+                </div>
+            </div>
+
+            <!-- Mood Statistics -->
+            <div class="stats-content" id="statsContent" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Most Common Mood</h3>
+                        <div class="stat-value" id="topMoodStat">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Sessions</h3>
+                        <div class="stat-value" id="totalSessionsStat">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Mood Variety</h3>
+                        <div class="stat-value" id="moodVarietyStat">-</div>
+                    </div>
+                </div>
+
+                <div class="insights-section" id="insightsSection">
+                    <h3>Personal Insights</h3>
+                    <div class="insights-list" id="insightsList">
+                        <div class="loading">🔍 Analyzing your patterns...</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -12,6 +12,10 @@ A Node.js application that recommends Spotify tracks based on your current mood 
 - **Responsive Web Interface**: Beautiful UI with mood buttons and track display
 - **Real-time Recommendations**: Instant track suggestions based on selected mood
 - **Session Management**: Secure token storage and automatic refresh
+- **📊 Mood History + Smart Tracker**: NEW! Track your mood selections over time
+- **🎯 Personalized Analytics**: Get insights about your listening patterns and preferences
+- **📈 Interactive Timeline**: View your mood history with filtering and search options
+- **🧠 Smart Insights**: AI-powered analysis of your music discovery habits
 
 ## 🛠️ Tech Stack
 
@@ -30,17 +34,22 @@ moodify/
 │   └── index.js              # Main server file
 ├── routes/
 │   ├── auth.js              # Authentication routes
-│   └── music.js             # Music recommendation routes
+│   ├── music.js             # Music recommendation routes
+│   └── mood.js              # NEW: Mood tracking and analytics routes
+├── models/
+│   └── MoodLog.js           # NEW: MongoDB mood tracking model
 ├── config/
 │   ├── spotify.js           # Spotify API configuration
-│   └── moodMapper.js        # Mood to audio features mapping
+│   ├── moodMapper.js        # Mood to audio features mapping
+│   └── database.js          # NEW: MongoDB connection configuration
 ├── public/
-│   ├── index.html           # Frontend UI
-│   └── app.js               # Frontend JavaScript
+│   ├── index.html           # Frontend UI (enhanced with mood history)
+│   └── app.js               # Frontend JavaScript (with tracking features)
 ├── .env.example             # Environment variables template
 ├── .gitignore              # Git ignore rules
 ├── package.json            # Dependencies and scripts
-└── README.md               # Project documentation
+├── README.md               # Project documentation
+└── MOOD_TRACKING_IMPLEMENTATION.md  # NEW: Mood tracking feature docs
 ```
 
 ## 🔧 Setup Instructions
@@ -59,6 +68,8 @@ cd Project-Portfolio-III
 ### 2. Install Dependencies
 ```bash
 npm install
+# If mongoose is not installed automatically:
+npm install mongoose
 ```
 
 ### 3. Set Up Spotify App
@@ -72,7 +83,7 @@ npm install
 cp .env.example .env
 ```
 
-Edit `.env` with your Spotify credentials:
+Edit `.env` with your Spotify credentials and MongoDB connection:
 ```env
 SPOTIFY_CLIENT_ID=your_spotify_client_id_here
 SPOTIFY_CLIENT_SECRET=your_spotify_client_secret_here
@@ -80,6 +91,9 @@ REDIRECT_URI=http://127.0.0.1:3555/callback
 PORT=3555
 SESSION_SECRET=your_random_session_secret_here
 NODE_ENV=development
+
+# NEW: MongoDB Configuration for Mood Tracking
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/moodify?retryWrites=true&w=majority
 ```
 
 ### 5. Run the Application
@@ -135,7 +149,44 @@ Open your browser and navigate to: `http://localhost:3555`
 fetch('/recommendations?mood=happy&limit=10')
   .then(response => response.json())
   .then(data => console.log(data.tracks));
+
+// NEW: Get user's mood history
+fetch('/api/mood/history/USER_ID?days=30')
+  .then(response => response.json())
+  .then(data => console.log(data.data.history));
+
+// NEW: Get mood statistics and insights
+fetch('/api/mood/stats/USER_ID')
+  .then(response => response.json())
+  .then(data => console.log(data.data.insights));
 ```
+
+## 📊 Mood History + Smart Tracker (NEW!)
+
+### What It Does
+The mood tracking system automatically logs every time you select a mood and get music recommendations. Over time, it builds a comprehensive picture of your music discovery habits and provides personalized insights.
+
+### Key Features
+- **🔄 Automatic Logging**: Every mood selection is automatically saved to your personal history
+- **📈 Interactive Timeline**: View your mood selections over time with beautiful visualizations
+- **🎯 Smart Filtering**: Filter your history by specific moods or date ranges
+- **🧠 Personalized Insights**: Get AI-powered insights about your listening patterns:
+  - Your most common moods
+  - Peak music discovery times
+  - Favorite days for music exploration
+  - Mood diversity analysis
+  - Activity level feedback
+
+### How to Use
+1. **Select Moods**: Use Moodify normally - every mood selection is automatically tracked
+2. **View History**: Click "View History" to see your mood timeline
+3. **Check Stats**: Click "View Stats" to see analytics and insights
+4. **Filter Data**: Use the dropdown filters to focus on specific moods or time periods
+
+### Privacy & Data
+- All mood data is stored securely in your personal MongoDB database
+- Only you can access your mood history and statistics
+- Data is used solely to provide personalized insights and improve your experience
 
 ## 📋 Project Milestones
 

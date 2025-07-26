@@ -57,12 +57,14 @@ class MoodifyApp {
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('userSection').style.display = 'block';
                 document.getElementById('moodSection').style.display = 'block';
+                document.getElementById('moodHistorySection').style.display = 'block';
                 document.getElementById('userName').textContent = data.user?.display_name || 'Spotify User';
             } else {
                 // User is not logged in - show login button
                 document.getElementById('loginSection').style.display = 'block';
                 document.getElementById('userSection').style.display = 'none';
                 document.getElementById('moodSection').style.display = 'none';
+                document.getElementById('moodHistorySection').style.display = 'none';
             }
         } catch (error) {
             console.error('Error checking auth status:', error);
@@ -136,6 +138,9 @@ class MoodifyApp {
 
             // Display the track recommendations
             this.displayResults(data);
+
+            // Log the mood selection for tracking and analytics
+            this.logMoodSelection(mood, data);
         } catch (error) {
             console.error('Error getting recommendations:', error);
 
@@ -147,6 +152,53 @@ class MoodifyApp {
                     ${error.message.includes('login') ? '<a href="/login" class="btn">Login Again</a>' : ''}
                 </div>
             `;
+        }
+    }
+
+    /**
+     * LOG MOOD SELECTION
+     *
+     * Automatically logs when a user selects a mood and gets recommendations.
+     * This data is used for mood history and analytics features.
+     */
+    async logMoodSelection(mood, recommendationData) {
+        try {
+            // Prepare the data to log
+            const logData = {
+                mood: mood,
+                playlistUsed: recommendationData.playlistUsed || null,
+                recommendedTracks: recommendationData.tracks?.map(track => ({
+                    trackId: track.id,
+                    trackName: track.name,
+                    artistName: Array.isArray(track.artists) ? track.artists.join(', ') : track.artists,
+                    spotifyUrl: track.external_urls?.spotify
+                })) || [],
+                sessionData: {
+                    trackCount: recommendationData.tracks?.length || 0,
+                    tracksClicked: 0, // Will be updated when user clicks tracks
+                    timestamp: new Date().toISOString()
+                }
+            };
+
+            // Send the log data to the backend
+            const response = await fetch('/api/mood/log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(logData)
+            });
+
+            if (response.ok) {
+                console.log(`📊 Mood "${mood}" logged successfully`);
+            } else {
+                const errorData = await response.json();
+                console.warn('⚠️ Failed to log mood:', errorData.message);
+            }
+
+        } catch (error) {
+            // Don't show errors to user for logging failures
+            console.warn('⚠️ Mood logging failed:', error.message);
         }
     }
 
@@ -189,6 +241,25 @@ class MoodifyApp {
 
         html += '</div>';
         resultsDiv.innerHTML = html;
+
+        // Add click tracking to Spotify links
+        this.setupTrackClickTracking();
+    }
+
+    /**
+     * SETUP TRACK CLICK TRACKING
+     *
+     * Adds event listeners to track when users click on Spotify links
+     * This helps measure engagement with recommendations
+     */
+    setupTrackClickTracking() {
+        const trackLinks = document.querySelectorAll('.track-link');
+        trackLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                console.log('🎵 User clicked on Spotify track');
+                // Could send analytics event here if needed
+            });
+        });
     }
 
     setupEventListeners() {
@@ -199,6 +270,278 @@ class MoodifyApp {
             window.history.replaceState({}, document.title, window.location.pathname);
             // Refresh auth status
             this.checkAuthStatus();
+        }
+
+        // Setup mood history event listeners
+        this.setupMoodHistoryListeners();
+    }
+
+    /**
+     * SETUP MOOD HISTORY EVENT LISTENERS
+     *
+     * Sets up all the event listeners for the mood history functionality
+     */
+    setupMoodHistoryListeners() {
+        const toggleHistoryBtn = document.getElementById('toggleHistoryBtn');
+        const toggleStatsBtn = document.getElementById('toggleStatsBtn');
+        const moodFilter = document.getElementById('moodFilter');
+        const daysFilter = document.getElementById('daysFilter');
+
+        // Toggle between history and stats view
+        if (toggleHistoryBtn) {
+            toggleHistoryBtn.addEventListener('click', () => this.showMoodHistory());
+        }
+
+        if (toggleStatsBtn) {
+            toggleStatsBtn.addEventListener('click', () => this.showMoodStats());
+        }
+
+        // Filter change listeners
+        if (moodFilter) {
+            moodFilter.addEventListener('change', () => this.filterMoodHistory());
+        }
+
+        if (daysFilter) {
+            daysFilter.addEventListener('change', () => this.filterMoodHistory());
+        }
+    }
+
+    /**
+     * SHOW MOOD HISTORY
+     *
+     * Displays the user's mood history timeline
+     */
+    async showMoodHistory() {
+        if (!this.isAuthenticated) {
+            console.log('User not authenticated, cannot show mood history');
+            return;
+        }
+
+        const historySection = document.getElementById('moodHistorySection');
+        const historyContent = document.getElementById('historyContent');
+        const statsContent = document.getElementById('statsContent');
+        const toggleHistoryBtn = document.getElementById('toggleHistoryBtn');
+        const toggleStatsBtn = document.getElementById('toggleStatsBtn');
+
+        // Show the history section and content
+        historySection.style.display = 'block';
+        historyContent.style.display = 'block';
+        statsContent.style.display = 'none';
+
+        // Update button visibility
+        toggleHistoryBtn.style.display = 'none';
+        toggleStatsBtn.style.display = 'inline-flex';
+
+        // Load and display mood history
+        await this.loadMoodHistory();
+    }
+
+    /**
+     * SHOW MOOD STATS
+     *
+     * Displays the user's mood statistics and insights
+     */
+    async showMoodStats() {
+        if (!this.isAuthenticated) {
+            console.log('User not authenticated, cannot show mood stats');
+            return;
+        }
+
+        const historyContent = document.getElementById('historyContent');
+        const statsContent = document.getElementById('statsContent');
+        const toggleHistoryBtn = document.getElementById('toggleHistoryBtn');
+        const toggleStatsBtn = document.getElementById('toggleStatsBtn');
+
+        // Show stats content, hide history
+        historyContent.style.display = 'none';
+        statsContent.style.display = 'block';
+
+        // Update button visibility
+        toggleHistoryBtn.style.display = 'inline-flex';
+        toggleStatsBtn.style.display = 'none';
+
+        // Load and display mood statistics
+        await this.loadMoodStats();
+    }
+
+    /**
+     * LOAD MOOD HISTORY
+     *
+     * Fetches and displays the user's mood history from the backend
+     */
+    async loadMoodHistory() {
+        const timeline = document.getElementById('historyTimeline');
+        const moodFilter = document.getElementById('moodFilter').value;
+        const daysFilter = document.getElementById('daysFilter').value;
+
+        try {
+            timeline.innerHTML = '<div class="loading">📊 Loading your mood history...</div>';
+
+            // Get user ID from session
+            const authResponse = await fetch('/auth/status');
+            const authData = await authResponse.json();
+
+            if (!authData.authenticated || !authData.user) {
+                throw new Error('User not authenticated');
+            }
+
+            const userId = authData.user.id;
+
+            // Build query parameters
+            const params = new URLSearchParams({
+                limit: '20',
+                days: daysFilter
+            });
+
+            if (moodFilter) {
+                params.append('mood', moodFilter);
+            }
+
+            // Fetch mood history
+            const response = await fetch(`/api/mood/history/${userId}?${params}`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to load mood history');
+            }
+
+            this.displayMoodHistory(data.data.history);
+
+        } catch (error) {
+            console.error('Error loading mood history:', error);
+            timeline.innerHTML = `
+                <div class="error">
+                    <h3>Unable to load mood history</h3>
+                    <p>${error.message}</p>
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * DISPLAY MOOD HISTORY
+     *
+     * Renders the mood history timeline
+     */
+    displayMoodHistory(history) {
+        const timeline = document.getElementById('historyTimeline');
+
+        if (!history || history.length === 0) {
+            timeline.innerHTML = `
+                <div class="empty-state">
+                    <h3>No mood history yet</h3>
+                    <p>Start selecting moods to see your listening patterns!</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        history.forEach(entry => {
+            const date = new Date(entry.timestamp);
+            const formattedDate = date.toLocaleDateString();
+            const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const trackCount = entry.sessionData?.trackCount || 0;
+
+            html += `
+                <div class="history-item">
+                    <div class="history-item-header">
+                        <span class="mood-badge">${this.capitalizeMood(entry.mood)}</span>
+                        <span class="history-timestamp">${formattedDate} at ${formattedTime}</span>
+                    </div>
+                    <div class="history-tracks">
+                        🎵 ${trackCount} tracks recommended
+                        ${entry.playlistUsed ? `• Playlist: ${entry.playlistUsed}` : ''}
+                    </div>
+                </div>
+            `;
+        });
+
+        timeline.innerHTML = html;
+    }
+
+    /**
+     * FILTER MOOD HISTORY
+     *
+     * Reloads mood history with current filter settings
+     */
+    async filterMoodHistory() {
+        await this.loadMoodHistory();
+    }
+
+    /**
+     * LOAD MOOD STATS
+     *
+     * Fetches and displays mood statistics and insights
+     */
+    async loadMoodStats() {
+        try {
+            // Get user ID from session
+            const authResponse = await fetch('/auth/status');
+            const authData = await authResponse.json();
+
+            if (!authData.authenticated || !authData.user) {
+                throw new Error('User not authenticated');
+            }
+
+            const userId = authData.user.id;
+
+            // Fetch mood statistics
+            const response = await fetch(`/api/mood/stats/${userId}?days=30`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to load mood statistics');
+            }
+
+            this.displayMoodStats(data.data);
+
+        } catch (error) {
+            console.error('Error loading mood stats:', error);
+            document.getElementById('insightsList').innerHTML = `
+                <div class="error">
+                    <h3>Unable to load statistics</h3>
+                    <p>${error.message}</p>
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * DISPLAY MOOD STATS
+     *
+     * Renders mood statistics and insights
+     */
+    displayMoodStats(stats) {
+        // Update stat cards
+        document.getElementById('topMoodStat').textContent =
+            stats.moodCounts[0]?._id ? this.capitalizeMood(stats.moodCounts[0]._id) : 'None';
+
+        document.getElementById('totalSessionsStat').textContent = stats.summary.totalMoodLogs;
+        document.getElementById('moodVarietyStat').textContent = `${stats.summary.moodVariety}/6`;
+
+        // Display insights
+        const insightsList = document.getElementById('insightsList');
+        if (stats.insights && stats.insights.length > 0) {
+            let html = '';
+            stats.insights.forEach(insight => {
+                html += `
+                    <div class="insight-item">
+                        <div class="insight-title">
+                            <span class="insight-icon">${insight.icon}</span>
+                            ${insight.title}
+                        </div>
+                        <div class="insight-message">${insight.message}</div>
+                    </div>
+                `;
+            });
+            insightsList.innerHTML = html;
+        } else {
+            insightsList.innerHTML = `
+                <div class="empty-state">
+                    <p>Keep using Moodify to unlock personalized insights!</p>
+                </div>
+            `;
         }
     }
 

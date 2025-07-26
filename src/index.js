@@ -21,9 +21,13 @@ const express = require('express');           // Web framework for Node.js
 const session = require('express-session');   // Session management for storing user tokens
 const path = require('path');                 // File path utilities
 
+// Import database configuration
+const { initializeDatabase } = require('../config/database');
+
 // Import our custom route handlers
 const authRoutes = require('../routes/auth');     // Spotify OAuth login/logout
 const musicRoutes = require('../routes/music');   // Music recommendations API
+const moodRoutes = require('../routes/mood');     // Mood tracking and history API
 
 // Create Express application instance
 const app = express();
@@ -79,6 +83,9 @@ app.use('/', authRoutes);
 // Music routes: /api/music/recommendations, /api/music/moods
 app.use('/api/music', musicRoutes);
 
+// Mood tracking routes: /api/mood/log, /api/mood/history, /api/mood/stats
+app.use('/api/mood', moodRoutes);
+
 /**
  * HOME PAGE ROUTE
  *
@@ -110,10 +117,25 @@ app.use((req, res) => {
  *
  * Begin listening for incoming requests on the specified port
  */
-app.listen(PORT, () => {
-  console.log(`🎵 Moodify server running on http://localhost:${PORT}`);
-  console.log(`🔐 Visit http://localhost:${PORT}/login to authenticate with Spotify`);
-});
+async function startServer() {
+  try {
+    // Initialize database connection
+    await initializeDatabase();
+
+    // Start the Express server
+    app.listen(PORT, () => {
+      console.log(`🎵 Moodify server running on http://localhost:${PORT}`);
+      console.log(`🔐 Visit http://localhost:${PORT}/login to authenticate with Spotify`);
+      console.log(`📊 Mood tracking database connected and ready`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+// Start the server
+startServer();
 
 // Export the app for testing purposes
 module.exports = app;
